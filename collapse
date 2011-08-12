@@ -1,0 +1,23 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings FATAL => 'all';
+
+my ( $key, @values ) = next_record();
+
+while ( defined $key ) {
+    my ( $next_key, @next_values ) = next_record();    
+    if ( defined $next_key and $next_key eq $key ) {
+        push @values, @next_values;
+    }
+    else {
+        print join( "\t", $key, @values ) . "\n";
+        $key = $next_key;
+        @values = @next_values;
+    }    
+}
+
+sub next_record {
+    defined( local $_ = <> ) or return;
+    chomp; split;
+}
