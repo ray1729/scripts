@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# This is based on an idea stolen from Oliver; see his great blog post
+# http://blogs.perl.org/users/oliver_gorwits/2011/07/locallibs-for-dist-development.html
+# for the rationale.
+#
+# This script works hand-in-hand with new-profile.
+# 
+
+if [ -z "$1" ]
+  then
+    echo 'Pass the profile name, please'
+    echo 'Valid profiles:'
+    for DIRENT in ${HOME}/perl-profiles/*; do
+        if test -d "${DIRENT}"; then
+            PROFILE=${DIRENT##*/}
+            echo "    ${PROFILE}"
+        fi
+    done
+    exit
+fi
+
+PROFILE="$1"
+
+if ! test -d "${HOME}/perl-profiles/${PROFILE}"; then
+    echo "No such profile ${PROFILE}" >&2
+    exit 2
+fi
+
+export PROFILE
+exec env PATH=${HOME}/bin:/bin:/usr/bin PERL5LIB= \
+    "${HOME}/perl-profiles/${PROFILE}/bin/localenv" \
+    /bin/bash --rcfile "${HOME}/perl-profiles/${PROFILE}/etc/bashrc"

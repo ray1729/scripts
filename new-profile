@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# This is based on an idea stolen from Oliver; see his great blog post
+# http://blogs.perl.org/users/oliver_gorwits/2011/07/locallibs-for-dist-development.html
+# for the rationale.
+#
+# This script works hand-in-hand with switch-profile.
+# 
+
+set -e
+
+if [ -z "$1" ]
+  then
+    echo 'Pass the profile name, please' >&2
+    exit 2
+fi
+
+echo "Creating local::lib for $1 ..."
+sleep 3
+
+test -d "${HOME}/perl-profiles" || mkdir -v "${HOME}/perl-profiles"
+PROFILE_DIR="${HOME}/perl-profiles/$1"
+
+curl -L http://cpanmin.us/ | perl - --notest --quiet --local-lib "${PROFILE_DIR}" \    
+    App::cpanminus \
+    Dist::Zilla \
+    App::local::lib::helper
+
+mkdir -p "${PROFILE_DIR}/etc"
+cat > "${PROFILE_DIR}/etc/bashrc" <<EOF
+export PS1="\u@\h:\w [\$PROFILE]\\\$ "
+EOF
