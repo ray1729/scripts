@@ -21,7 +21,7 @@ sleep 3
 test -d "${HOME}/perl-profiles" || mkdir -v "${HOME}/perl-profiles"
 PROFILE_DIR="${HOME}/perl-profiles/$1"
 
-curl -L http://cpanmin.us/ | perl - --notest --quiet --local-lib "${PROFILE_DIR}" \    
+curl -L http://cpanmin.us/ | perl - --notest --quiet --local-lib "${PROFILE_DIR}" \
     App::cpanminus \
     Dist::Zilla \
     App::local::lib::helper
