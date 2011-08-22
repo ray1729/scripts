@@ -52,7 +52,7 @@ sub svn_find {
     }
     
     for my $dir ( grep m{/$}, @dirents ) {
-        svn_find( $repos_url . $dir, $depth++ );
+        svn_find( $repos_url . $dir, $depth + 1 );
     }    
 }
 
