@@ -156,3 +156,30 @@ sub popup_error {
     my $error = shift;
     $mw->messageBox( -title => 'Error', -message => $error, -type => 'ok' );
 }
+
+__END__
+
+=head1 NAME
+
+tk-comm
+
+=head1 DESCRIPTION
+
+B<tk-comm> is a graphical version of the standard Unix L<comm(1)>
+command. Unlike L<comm(1)>, it does not require files to be sorted,
+and it handles Unix, Windows, and Mac line endings transparently.
+
+=head1 SEE ALSO
+
+L<comm(1)>, L<List::Compare>
+
+=head1 AUTHOR
+
+Ray Miller E<lt>ray@1729.org.ukE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2012 Ray Miller.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
