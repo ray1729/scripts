@@ -6,6 +6,7 @@ use warnings FATAL => 'all';
 use Tk;
 use IO::File;
 use List::Compare;
+require Tk::ROText;
 
 my ( $filename_A, $filename_B ) = ( '', '' );
 
@@ -18,7 +19,8 @@ add_choose_file_frame( 'File B', \$filename_B );
 my $button_frame = $mw->Frame->pack;
 $button_frame->Button( -text => "File A only", -command => \&file_A_only )->pack( -side => 'left' );
 $button_frame->Button( -text => "File B only", -command => \&file_B_only )->pack( -side => 'left' );
-$button_frame->Button( -text => "Both files",  -command => \&both_files)->pack;
+$button_frame->Button( -text => "Both files",  -command => \&both_files  )->pack( -side => 'left' ) ;
+$button_frame->Button( -text => "Quit",        -command => sub { $mw->destroy } )->pack;
 
 MainLoop;
 
@@ -45,29 +47,50 @@ sub choose_file {
 }
 
 sub file_A_only {
-    my $lc = compare_files();
-    save_results( $lc->get_unique_ref );
+    my $lc = compare_files()
+        or return;
+    show_results( 'File A only', $lc->get_unique_ref );
 }
 
 sub file_B_only {
-    my $lc = compare_files();
-    save_results( $lc->get_complement_ref );
+    my $lc = compare_files()
+        or return;
+    show_results( 'File B only', $lc->get_complement_ref );
 }
 
 sub both_files {
-    my $lc = compare_files();
-    save_results( $lc->get_intersection_ref );
+    my $lc = compare_files()
+        or return;
+    show_results( 'Both files', $lc->get_intersection_ref );
+}
+
+sub show_results {
+    my ( $title, $results ) = @_;
+
+    my $results_window = $mw->Toplevel( -title => $title );
+    my $text = $results_window->Scrolled( 'ROText', -wrap => 'none', -scrollbars => 'osoe' )->pack;
+    $text->insert( 'end', join "\n", @{$results} );
+
+    $results_window->Button(
+        -text    => 'Close',
+        -command => sub { $results_window->destroy }
+    )->pack( -side => 'right' );
+    
+    $results_window->Button(
+        -text    => 'Save',
+        -command => sub { save_results( $results_window, $results ) && $results_window->destroy }
+    )->pack( -side => 'right' );
 }
 
 sub save_results {
-    my $results = shift;
-    
-    my $filename = $mw->getSaveFile();
+    my ( $rw, $results ) = @_;
+
+    my $filename = $rw->getSaveFile();
     unless ( defined $filename and length $filename ) {
         popup_error( "You must specify a file for the results to be saved" );
         return;
     }
-
+    
     my $fh = IO::File->new( $filename, O_RDWR|O_CREAT|O_TRUNC, 0644 );
     unless ( $fh ) {
         popup_error( "Failed to open $filename for writing: $!" );
@@ -77,8 +100,12 @@ sub save_results {
     for my $r ( @{$results} ) {
         $fh->print( "$r\n" );
     }
-
+    
     $fh->close;
+
+    $rw->messageBox( -title => 'Saved', -message => "Results saved to $filename", -type => 'ok' );
+
+    return 1;
 }
 
 sub compare_files {
