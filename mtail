@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings FATAL => 'all';
+
+use IO::Pipe;
+
+my $pipe = IO::Pipe->new();
+
+map { tail($_) } @ARGV;
+
+$pipe->reader();
+
+while (<$pipe>) {
+  print;
+}
+
+sub parse_host_file {
+  my $spec = shift;
+  if ( my ( $h, $f ) = $spec =~ m/^([^:]+):(.+)$/ ) {
+    return ( $h, $f );
+  }
+  else {
+    return ( undef, $spec );
+  }
+}
+
+sub tail {
+  my ( $spec ) = @_;
+  my ( $host, $file ) = parse_host_file($spec);
+  my $cmd = $host ? ['ssh', $host, 'tail', '-F', $file ] : ['tail', '-F', $file ];
+  my $prefix = $host ? "$host: " : "";
+  my $pid = fork();
+  if ( $pid ) { # parent
+    return $pid;
+  }
+  elsif ( defined($pid) ) { # child
+    $pipe->writer();
+    open( my $fh, '-|', @$cmd ) or exit 255;
+    while ( <$fh> ) {
+      s/^/$prefix/;
+      $pipe->print($_);
+      $pipe->flush();
+    }
+    close($fh);
+    exit 0;
+  }
+  else {
+    die "Failed to tail $spec (fork failed): $!";
+  }
+}
