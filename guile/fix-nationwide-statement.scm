@@ -27,7 +27,7 @@
 (define (format-amount s)
   (string-filter currency-charset s))
 
-;; Profiles for the different statemnets.
+;; Profiles for the different statement formats.
 ;; skip: the number of leading rows to skip
 ;; header: boolean indicating whether or not the first unskipped
 ;;         row is a header
