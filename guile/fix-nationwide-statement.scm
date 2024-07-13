@@ -78,7 +78,10 @@
     (lambda (port)
       (scm->dsv data port #:format 'rfc4180))))
 
-
+;; Apply the specified updates to data (a list of rows
+;; read from the CSV). If a 'skip value is specified, drop
+;; this many leading rows. If a 'header is present, only
+;; apply the updates to the succeeding rows.
 (define (update-data spec data)
   (let* ((data (drop data (or (assq-ref spec 'skip) 0)))
          (header (if (assq-ref spec 'header) (car data) #f))
@@ -107,7 +110,7 @@
       (display "\
 Usage: fix-credit-card-statement [options]
     -h, --help             Display this help.
-    -i, --input=FILENAME   Input file path.
+    -i, --input=FILENAME   Input file path. Required.
     -o, --output=FILENAME  Output file path. Required unless --overwrite is given.
     -w, --overwrite        Overwrite the input file with the updated data.
     -p, --profile=PROFILE  Profile name [credit-card|current-account].
