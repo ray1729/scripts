@@ -81,15 +81,13 @@
 ;; Apply the specified updates to data (a list of rows
 ;; read from the CSV). If a 'skip value is specified, drop
 ;; this many leading rows. If a 'header is present, only
-;; apply the updates to the succeeding rows.
+;; apply the updates to the succeeding rows, preserving
+;; the header as-is.
 (define (update-data spec data)
-  (let* ((data (drop data (or (assq-ref spec 'skip) 0)))
-         (header (if (assq-ref spec 'header) (car data) #f))
-         (data (if header (cdr data) data)))
-    (for-each (process-row spec) data)
-    (if header
-        (cons header data)
-        data)))
+  (let* ((skip (assq-ref spec 'skip))
+         (data (if skip (drop data skip) data)))
+    (for-each (process-row spec) (if (assq-ref spec 'header) (cdr data) data))
+    data))
 
 ;; Apply the updates defined in `spec` to the statement read
 ;; from input-path and write the updated data to output-path.
